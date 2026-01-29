@@ -1,6 +1,17 @@
 package com.example.eventanalytics.config;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
+
 import com.example.eventanalytics.service.JwtService;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
@@ -8,15 +19,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
 
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -27,8 +29,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   }
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-      throws ServletException, IOException {
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    String path = request.getServletPath();
+    return path.startsWith("/auth/")
+        || path.equals("/health")
+        || path.equals("/error")
+        || path.startsWith("/v3/api-docs")
+        || path.startsWith("/swagger-ui")
+        || path.equals("/swagger-ui.html");
+  }
+
+  @Override
+  protected void doFilterInternal(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      FilterChain chain
+  ) throws ServletException, IOException {
 
     String header = request.getHeader(HttpHeaders.AUTHORIZATION);
     if (header == null || !header.startsWith("Bearer ")) {
@@ -37,19 +53,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     String token = header.substring("Bearer ".length()).trim();
+
     try {
       Jws<Claims> parsed = jwt.parseAndValidate(token);
       UUID userId = UUID.fromString(parsed.getPayload().getSubject());
 
       var auth = new UsernamePasswordAuthenticationToken(
-          userId, // principal
+          userId, // principal (we’ll use this for scoping)
           null,
           List.of(new SimpleGrantedAuthority("ROLE_USER"))
       );
+
       SecurityContextHolder.getContext().setAuthentication(auth);
       chain.doFilter(request, response);
+
     } catch (JwtException | IllegalArgumentException e) {
-      // invalid token -> no auth; downstream will return 401 for protected endpoints
+      // Invalid token: clear context and continue. Protected endpoints will 401.
       SecurityContextHolder.clearContext();
       chain.doFilter(request, response);
     }

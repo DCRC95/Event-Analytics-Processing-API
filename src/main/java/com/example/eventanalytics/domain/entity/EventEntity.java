@@ -7,11 +7,20 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import io.hypersistence.utils.hibernate.type.json.JsonType;
+import org.hibernate.annotations.Type;
+
+import java.util.Map;
+
 
 @Entity
 @Table(name = "events")
 public class EventEntity {
 
+  @Type(JsonType.class)
+  @Column(columnDefinition = "jsonb")
+  private Map<String, Object> metadata;
+  
   @Id
   @Column(columnDefinition = "uuid")
   private UUID id;
@@ -31,40 +40,30 @@ public class EventEntity {
   @Column(name = "occurred_at", nullable = false)
   private Instant occurredAt;
 
-  @Column(columnDefinition = "jsonb")
-  private String metadata;
-
   @Column(name = "created_at", nullable = false)
   private Instant createdAt;
 
   protected EventEntity() {}
 
-  public EventEntity(
-      UUID id,
-      UUID userId,
-      String type,
-      String entityType,
-      String entityId,
-      Instant occurredAt,
-      String metadata,
-      Instant createdAt
-  ) {
-    this.id = id;
-    this.userId = userId;
-    this.type = type;
-    this.entityType = entityType;
-    this.entityId = entityId;
-    this.occurredAt = occurredAt;
-    this.metadata = metadata;
-    this.createdAt = createdAt;
-  }
+public EventEntity(
+    UUID id,
+    UUID userId,
+    String type,
+    String entityType,
+    String entityId,
+    Instant occurredAt,
+    Map<String, Object> metadata,
+    Instant createdAt
+) {
+  this.id = id;
+  this.userId = userId;
+  this.type = type;
+  this.entityType = entityType;
+  this.entityId = entityId;
+  this.occurredAt = occurredAt;
+  this.metadata = metadata;
+  this.createdAt = createdAt;
+}
+public Map<String, Object> getMetadata() { return metadata; }
 
-  public UUID getId() { return id; }
-  public UUID getUserId() { return userId; }
-  public String getType() { return type; }
-  public String getEntityType() { return entityType; }
-  public String getEntityId() { return entityId; }
-  public Instant getOccurredAt() { return occurredAt; }
-  public String getMetadata() { return metadata; }
-  public Instant getCreatedAt() { return createdAt; }
 }

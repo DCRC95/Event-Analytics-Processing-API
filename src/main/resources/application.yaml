@@ -6,7 +6,7 @@ spring:
     name: event-analytics-api
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:${DB_HOST:localhost}}:${DB_PORT:${DB_PORT:5432}}/${DB_NAME:${DB_NAME:event_analytics}}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:event_analytics}
     username: ${DB_USERNAME:app}
     password: ${DB_PASSWORD:app}
 
@@ -23,10 +23,12 @@ spring:
 
 logging:
   level:
-    org.springframework.security: INFO
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: DEBUG
+
 
 app:
   jwt:
     secret: ${JWT_SECRET:dev-secret-change-me-please-32-chars-min}
     issuer: ${JWT_ISSUER:event-analytics-api}
     expMinutes: ${JWT_EXP_MINUTES:60}
+

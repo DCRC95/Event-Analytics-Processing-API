@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: event-analytics-api
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:${DB_HOST:localhost}}:${DB_PORT:${DB_PORT:5432}}/${DB_NAME:${DB_NAME:event_analytics}}
+    username: ${DB_USERNAME:app}
+    password: ${DB_PASSWORD:app}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    org.springframework.security: INFO
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-secret-change-me-please-32-chars-min}
+    issuer: ${JWT_ISSUER:event-analytics-api}
+    expMinutes: ${JWT_EXP_MINUTES:60}

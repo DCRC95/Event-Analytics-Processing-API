@@ -512,11 +512,11 @@ column "metadata" is of type jsonb but expression is of type character varying
 **Solution:**
 - Added Hypersistence Utils dependency (`hypersistence-utils-hibernate-63`)
 - Annotated entity field with proper JSONB type mapping:
-  ```java
+```
 @Type(JsonType.class)
 @Column(columnDefinition = "jsonb")
 private Map<String, Object> metadata;
-  ```
+```
 
 **Why This Matters:**
 - JSONB isn't "just a string column"

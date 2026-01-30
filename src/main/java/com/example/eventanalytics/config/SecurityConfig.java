@@ -24,8 +24,9 @@ public class SecurityConfig {
         .formLogin(form -> form.disable())
         .logout(logout -> logout.disable())
         .exceptionHandling(ex -> ex
-            .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-        )
+          .authenticationEntryPoint((req, res, e) -> res.sendError(401))
+          .accessDeniedHandler((req, res, e) -> res.sendError(403))
+                )
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
             .requestMatchers("/health", "/error").permitAll()
@@ -34,5 +35,6 @@ public class SecurityConfig {
         )
         .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
         .build();
+        
   }
 }

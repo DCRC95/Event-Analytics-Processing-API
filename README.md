@@ -204,7 +204,7 @@ curl -X POST http://localhost:8080/events \
   }'
 ```
 
-## 🔍 Key Features
+##  Key Features
 
 ### JSONB Support
 

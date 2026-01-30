@@ -541,6 +541,7 @@ private Map<String, Object> metadata;
 ```mermaid
 sequenceDiagram
     participant T1 as Test Class 1
+    participant T2 as Test Class 2
     participant SC as Spring Context
     participant TC as Testcontainers
     participant DB as PostgreSQL
@@ -554,7 +555,6 @@ sequenceDiagram
     
     Note over SC,DB: Test Class 2 starts
     
-    participant T2 as Test Class 2
     T2->>TC: Start New Container
     TC->>DB: New Container on port 61234
     T2->>SC: Reuse Context (WRONG!)
@@ -573,6 +573,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant T1 as Test Class 1
+    participant T2 as Test Class 2
     participant SC as Spring Context
     participant TC as Testcontainers
     participant DB as PostgreSQL
@@ -582,15 +583,14 @@ sequenceDiagram
     T1->>SC: Create Context
     SC->>DB: Connect (port 55736)
     T1->>T1: Tests Pass
-    T1->>SC: @DirtiesContext<br/>Discard Context
+    T1->>SC: DirtiesContext<br/>Discard Context
     
     Note over SC,DB: Test Class 2 starts
     
-    participant T2 as Test Class 2
     T2->>TC: Start New Container
     TC->>DB: New Container on port 61234
     T2->>SC: Create Fresh Context
-    SC->>SC: Re-read @DynamicPropertySource
+    SC->>SC: Re-read DynamicPropertySource
     SC->>DB: Connect (port 61234)
     DB-->>SC: Success
     SC-->>T2: Tests Pass

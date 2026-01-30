@@ -1,4 +1,4 @@
-# Event Analytics & Processing API
+![CI](https://github.com/DCRC95/Event-Analytics-Processing-API/actions/workflows/ci.yml/badge.svg) # Event Analytics & Processing API
 
 A production-style Spring Boot 3 backend API focused on event ingestion and analytics, built with stateless JWT authentication and PostgreSQL JSONB support.
 

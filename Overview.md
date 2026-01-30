@@ -193,16 +193,16 @@ flowchart TD
     B -->|Forbidden| E[AccessDeniedException]
     B -->|Other| F[Generic Exception]
     
-    C --> G[GlobalExceptionHandler<br/>@RestControllerAdvice]
+    C --> G["GlobalExceptionHandler<br/>RestControllerAdvice"]
     D --> G
     E --> G
     F --> G
     
     G --> H{Map to Status Code}
-    H -->|Validation| I[400 Bad Request<br/>+ validationErrors]
+    H -->|Validation| I["400 Bad Request<br/>+ validationErrors"]
     H -->|Auth| J[401 Unauthorised]
     H -->|Forbidden| K[403 Forbidden]
-    H -->|Other| L[500 Internal Error<br/>Generic message]
+    H -->|Other| L["500 Internal Error<br/>Generic message"]
     
     I --> M[ApiError DTO]
     J --> M
@@ -469,11 +469,11 @@ flowchart TD
 ```mermaid
 graph TD
     A[Integration Test] --> B[IntegrationTestBase]
-    B --> C[@Container<br/>PostgreSQLContainer]
+    B --> C["Container Annotation<br/>PostgreSQLContainer"]
     C --> D[Testcontainers<br/>Allocates Random Port]
     D --> E[PostgreSQL 16<br/>Container]
     
-    B --> F[@DynamicPropertySource]
+    B --> F[DynamicPropertySource]
     F --> G[Spring ApplicationContext]
     G --> H[Datasource Configuration]
     H --> E
@@ -513,9 +513,9 @@ column "metadata" is of type jsonb but expression is of type character varying
 - Added Hypersistence Utils dependency (`hypersistence-utils-hibernate-63`)
 - Annotated entity field with proper JSONB type mapping:
   ```java
-  @Type(JsonType.class)
-  @Column(columnDefinition = "jsonb")
-  private Map<String, Object> metadata;
+@Type(JsonType.class)
+@Column(columnDefinition = "jsonb")
+private Map<String, Object> metadata;
   ```
 
 **Why This Matters:**

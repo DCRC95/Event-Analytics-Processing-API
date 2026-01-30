@@ -85,7 +85,7 @@ sequenceDiagram
     C->>A: POST /auth/login
     A->>C: JWT token
     
-    C->>J: POST /events<br/>(Authorization: Bearer token)
+    C->>J: POST /events<br/>(Authorisation: Bearer token)
     J->>J: validates token
     J->>J: sets userId as principal
     J->>S: Forward request
@@ -102,7 +102,7 @@ This enables horizontal scaling with server-side user identity enforcement and p
 
 ```
 POST /events
-Authorization: Bearer <JWT>
+Authorisation: Bearer <JWT>
 ```
 
 ### Request Payload
@@ -130,6 +130,57 @@ flowchart TD
     G --> H[Persist event append-only]
     H --> I[200 OK]
 ```
+
+## Analytics API
+
+This API focuses on **read-heavy, non-CRUD analytics**, implemented using SQL aggregation and projection-based queries.
+
+### Summary Analytics
+
+```
+GET /analytics/summary?from=YYYY-MM-DD&to=YYYY-MM-DD
+Authorisation: Bearer <JWT>
+```
+
+**Response:**
+```json
+{
+  "from": "2026-01-01",
+  "to": "2026-01-31",
+  "totalEvents": 123,
+  "countsByType": {
+    "TASK_CREATED": 80,
+    "TASK_COMPLETED": 43
+  },
+  "dailyTotals": [
+    { "date": "2026-01-10", "count": 5 },
+    { "date": "2026-01-11", "count": 8 }
+  ],
+  "topEntities": [
+    { "entityType": "TASK", "entityId": "123", "count": 4 }
+  ]
+}
+```
+
+### Top-K Analytics
+
+```
+GET /analytics/top?type=TASK_CREATED&from=2026-01-01&to=2026-01-31&limit=5
+Authorization: Bearer <JWT>
+```
+
+Returns the most active entities for a given event type.
+
+### Analytics Design
+
+- Aggregation is performed in SQL, not in memory
+- Queries are scoped by `user_id` to enforce tenant isolation
+- Deterministic ordering ensures stable API responses
+
+This is important because:
+- It explicitly shows **non-CRUD value**
+- It mirrors exactly what you built in Steps 6–7
+- It makes the analytics the *headline feature*
 
 ## Setup & Installation
 
@@ -226,6 +277,30 @@ Analytics queries use explicit date semantics:
 
 This prevents off-by-one errors and ensures consistent daily grouping across time zones.
 
+## Design Trade-offs
+
+### Why append-only events?
+- Enables auditability and replay
+- Simplifies analytics correctness
+- Avoids complex update/delete semantics
+
+### Why SQL-first analytics?
+- Databases are optimized for aggregation
+- Avoids loading large datasets into memory
+- Scales better than in-application counting
+
+### Why UTC + inclusive/exclusive date ranges?
+- Prevents off-by-one errors
+- Ensures consistent grouping across time zones
+- Matches industry-standard analytics semantics
+
+### Why projections instead of entities?
+- Reduces memory usage
+- Makes intent explicit (read-only analytics)
+- Improves query performance
+
+This section shows engineering judgment, not just coding ability.
+
 ## Testing
 
 Run tests with:
@@ -233,6 +308,18 @@ Run tests with:
 ```bash
 ./mvnw test
 ```
+
+## How to Extend
+
+- **New event types**: add enum value + no schema change required
+- **New analytics dimensions**: add SQL projection queries
+- **Metadata analytics**: query JSONB fields using Postgres operators
+- **Scaling**:
+  - Partition events by time
+  - Add materialised views for heavy reports
+  - Introduce caching for hot analytics windows
+
+This signals you understand where the system goes next.
 
 ## Additional Documentation
 

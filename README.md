@@ -4,24 +4,12 @@ A production-style Spring Boot 3 backend API focused on event ingestion and anal
 
 ##  Architecture
 
-```
-Client
-  |
-  |  HTTP (JSON + JWT)
-  v
-Controller Layer
-  |
-  |  validated DTOs
-  v
-Service Layer
-  |
-  |  business rules (auth scoping, defaults)
-  v
-Repository Layer (JPA)
-  |
-  |  SQL / JSONB
-  v
-PostgreSQL
+```mermaid
+graph TD
+    A[Client] -->|HTTP JSON + JWT| B[Controller Layer]
+    B -->|validated DTOs| C[Service Layer]
+    C -->|business rules<br/>auth scoping, defaults| D[Repository Layer JPA]
+    D -->|SQL / JSONB| E[PostgreSQL]
 ```
 
 ### Design Principles
@@ -86,14 +74,24 @@ Stateless JWT-based authentication with no sessions or cookies.
 
 ### Authentication Flow
 
-```
-Client → POST /auth/login
-Client ← JWT token
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant A as AuthController
+    participant J as JwtAuthFilter
+    participant S as Service
+    participant D as Database
 
-Client → POST /events (Authorization: Bearer token)
-JwtAuthFilter → validates token
-JwtAuthFilter → sets userId as principal
-Controller → Service → DB
+    C->>A: POST /auth/login
+    A->>C: JWT token
+    
+    C->>J: POST /events<br/>(Authorization: Bearer token)
+    J->>J: validates token
+    J->>J: sets userId as principal
+    J->>S: Forward request
+    S->>D: Persist event
+    D->>S: Success
+    S->>C: 200 OK
 ```
 
 This enables horizontal scaling with server-side user identity enforcement and prevents cross-user data leakage.
@@ -121,31 +119,16 @@ Authorization: Bearer <JWT>
 
 ### Event Processing Flow
 
-```
-[Request received]
-        |
-        v
-[JWT validated?] -- no --> 401
-        |
-       yes
-        |
-        v
-[Validate DTO]
-        |
-        v
-[Extract userId from SecurityContext]
-        |
-        v
-[Default occurredAt if missing]
-        |
-        v
-[Create EventEntity]
-        |
-        v
-[Persist event (append-only)]
-        |
-        v
-[200 OK]
+```mermaid
+flowchart TD
+    A[Request received] --> B{JWT validated?}
+    B -->|no| C[401 Unauthorized]
+    B -->|yes| D[Validate DTO]
+    D --> E[Extract userId from SecurityContext]
+    E --> F[Default occurredAt if missing]
+    F --> G[Create EventEntity]
+    G --> H[Persist event append-only]
+    H --> I[200 OK]
 ```
 
 ## Setup & Installation

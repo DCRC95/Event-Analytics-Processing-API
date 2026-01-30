@@ -100,7 +100,7 @@ public interface EventRepository extends JpaRepository<EventEntity, UUID> {
 }
 /*We are using native SQL here because: 
 -date bucketing and limit are trivial in Postgres
--It avoid JPQL quirks and keep the query plan predictable
+-It avoid JPQL quirks and keeps the query plan predictable
 
 -Using JPQL with functions that behave differently per DB
 -It avoids returning huge datasets and sorting/grouping in Java

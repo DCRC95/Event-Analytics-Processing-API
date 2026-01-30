@@ -538,6 +538,7 @@ private Map<String, Object> metadata;
 - Hikari trying to use stale connections
 
 **Problem Visualisation:**
+
 ```mermaid
 sequenceDiagram
     participant T1 as Test Class 1
@@ -549,7 +550,7 @@ sequenceDiagram
     T1->>TC: Start Container
     TC->>DB: Container on port 55736
     T1->>SC: Create Context
-    SC->>DB: Connect (port 55736)
+    SC->>DB: Connect port 55736
     T1->>T1: Tests Pass
     T1->>SC: Context Cached
     
@@ -557,8 +558,8 @@ sequenceDiagram
     
     T2->>TC: Start New Container
     TC->>DB: New Container on port 61234
-    T2->>SC: Reuse Context (WRONG!)
-    SC->>DB: Try port 55736 (DEAD!)
+    T2->>SC: Reuse Context WRONG
+    SC->>DB: Try port 55736 DEAD
     DB-->>SC: Connection Refused
     SC-->>T2: 500 Error
 ```
@@ -570,6 +571,7 @@ sequenceDiagram
 - Fresh datasource built using currently running container's JDBC URL
 
 **Solution Visualisation:**
+
 ```mermaid
 sequenceDiagram
     participant T1 as Test Class 1
@@ -581,9 +583,9 @@ sequenceDiagram
     T1->>TC: Start Container
     TC->>DB: Container on port 55736
     T1->>SC: Create Context
-    SC->>DB: Connect (port 55736)
+    SC->>DB: Connect port 55736
     T1->>T1: Tests Pass
-    T1->>SC: DirtiesContext<br/>Discard Context
+    T1->>SC: DirtiesContext Discard Context
     
     Note over SC,DB: Test Class 2 starts
     
@@ -591,7 +593,7 @@ sequenceDiagram
     TC->>DB: New Container on port 61234
     T2->>SC: Create Fresh Context
     SC->>SC: Re-read DynamicPropertySource
-    SC->>DB: Connect (port 61234)
+    SC->>DB: Connect port 61234
     DB-->>SC: Success
     SC-->>T2: Tests Pass
 ```
